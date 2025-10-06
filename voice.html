@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>AI Voice Receptionist (Local)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; max-width: 720px; margin: 2rem auto; }
+    #log { border: 1px solid #ddd; padding: 12px; border-radius: 8px; min-height: 160px; }
+    .you { color: #333; }
+    .bot { color: #0066cc; }
+    button { padding: 10px 16px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+    .controls { display: flex; gap: 12px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <h1>AI Voice Receptionist (Local)</h1>
+  <p>Click <strong>Speak</strong>. On the first click, I will speak the greeting and the first prompt, then I will start listening.</p>
+
+  <div class="controls">
+    <button id="speak">Speak</button>
+    <button id="stop">Stop</button>
+    <button id="test">Test Voice</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    const log = (role, text) => {
+      const div = document.getElementById('log');
+      const p = document.createElement('p');
+      p.className = role;
+      p.textContent = (role === 'you' ? 'You: ' : 'Bot: ') + text;
+      div.appendChild(p);
+      div.scrollTop = div.scrollHeight;
+    };
+
+    // ---------------- Voice selection (Female, en-US) ----------------
+    const PREFERRED_US_FEMALE = [
+      // Edge/Windows online neural
+      'Microsoft Aria Online (Natural) - English (United States)',
+      'Microsoft Jenny Online (Natural) - English (United States)',
+      // Windows legacy
+      'Microsoft Zira Desktop - English (United States)',
+      // macOS / iOS
+      'Samantha', 'Victoria',
+      // Chrome generic
+      'Google US English',
+      // Other common female-ish names
+      'Joanna', 'Allison', 'Jenny', 'Aria', 'Kimberly'
+    ];
+    let selectedVoice = null;
+
+    function pickFemaleUSVoice(voices) {
+      const us = voices.filter(v => (v.lang || '').toLowerCase().startsWith('en-us'));
+      for (const name of PREFERRED_US_FEMALE) {
+        const exact = us.find(v => v.name === name);
+        if (exact) return exact;
+        const loose = us.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
+        if (loose) return loose;
+      }
+      if (us.length) return us[0];
+      const en = voices.filter(v => (v.lang || '').toLowerCase().startsWith('en'));
+      return en[0] || voices[0] || null;
+    }
+
+    function loadVoices() {
+      const list = window.speechSynthesis.getVoices();
+      if (!list || !list.length) return;
+      selectedVoice = pickFemaleUSVoice(list);
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    // ---------------- Humanized speech (sentence chunks) ----------------
+    // Speaks sentence-by-sentence with 250–350ms pauses and subtle pitch/rate variance.
+    function speakOnce(text, onend) {
+      if (!('speechSynthesis' in window)) { if (onend) onend(); return; }
+
+      // Ensure we have a voice picked (some browsers populate voices late)
+      if (!selectedVoice) loadVoices();
+
+      const synth = window.speechSynthesis;
+      synth.cancel(); // stop ongoing speech
+
+      const chunks = String(text || '')
+        .trim()
+        .replace(/\s+/g, ' ')
+        .split(/(?<=[.!?])\s+/)  // sentence boundaries
+        .filter(Boolean);
+
+      if (!chunks.length) { if (onend) onend(); return; }
+
+      let i = 0;
+      const sayNext = () => {
+        if (i >= chunks.length) { if (onend) onend(); return; }
+        const u = new SpeechSynthesisUtterance(chunks[i]);
+        u.lang = 'en-US';
+        if (selectedVoice) u.voice = selectedVoice;
+
+        // Gentle humanization
+        const baseRate = 0.96;   // slightly slower
+        const basePitch = 1.02;  // tiny lift
+        const jitter = (min, max) => Math.random() * (max - min) + min;
+        u.rate  = Math.max(0.9, Math.min(1.05, baseRate + jitter(-0.03, 0.03)));
+        u.pitch = Math.max(0.9, Math.min(1.1,  basePitch + jitter(-0.03, 0.03)));
+        u.volume = 1.0;
+
+        u.onend = () => {
+          i += 1;
+          setTimeout(sayNext, 250 + Math.random() * 100); // 250–350ms pause
+        };
+
+        synth.speak(u);
+      };
+      sayNext();
+    }
+
+    async function getGreeting() {
+      const r = await fetch('/api/greeting');
+      return r.json(); // { greeting, firstPrompt }
+    }
+
+    let greeted = false;
+    let recognizing = false;
+    let recog;
+
+    function startRec() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { alert('Web Speech API not supported in this browser. Try Chrome or Edge.'); return; }
+      recog = new SR();
+      recog.lang = 'en-US';
+      recog.interimResults = false;
+      recog.maxAlternatives = 1;
+
+      recog.onresult = async (e) => {
+        const text = e.results[0][0].transcript;
+        log('you', text);
+        const resp = await fetch('/api/voice-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, sessionId: 'browser-demo' })
+        });
+        const data = await resp.json();
+        const reply = data.reply || 'Sorry, I did not catch that.';
+        log('bot', reply);
+        window.speechSynthesis.cancel();
+        speakOnce(reply);
+      };
+      recog.onend = () => { recognizing = false; };
+      recognizing = true;
+      recog.start();
+    }
+
+    document.getElementById('speak').onclick = async () => {
+      // First click: speak greeting -> prompt, then start listening
+      if (!greeted) {
+        greeted = true;
+        const { greeting, firstPrompt } = await getGreeting();
+        log('bot', greeting);
+        log('bot', firstPrompt);
+        window.speechSynthesis.cancel();
+        speakOnce(greeting, () => speakOnce(firstPrompt, () => startRec()));
+        return;
+      }
+      if (!recognizing) startRec();
+    };
+
+    document.getElementById('stop').onclick = () => {
+      if (recognizing && recog) recog.stop();
+      window.speechSynthesis.cancel();
+    };
+
+    document.getElementById('test').onclick = () => {
+      window.speechSynthesis.cancel();
+      speakOnce('This is a quick voice test. I should sound like a natural, American female voice.');
+    };
+  </script>
+</body>
+</html>
