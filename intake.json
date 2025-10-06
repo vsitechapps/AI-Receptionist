@@ -1,0 +1,83 @@
+{
+  "id": "ai-receptionist-intake-v2",
+  "greeting": "Hello! I’m Eva, your virtual receptionist. I’ll grab a few details to help us schedule the right appointment.",
+  "fields": [
+    {
+      "id": "name",
+      "label": "First and last name",
+      "prompt": "Great—can I please have your first and last name?",
+      "type": "name",
+      "error": "Please say your first and last name, like 'Jane Doe'."
+    },
+    {
+      "id": "email",
+      "label": "Email",
+      "prompt": "Thanks. What’s the best email to reach you?",
+      "type": "email",
+      "error": "Please provide a valid email like 'jane@example.com' or say it as 'jane at example dot com'."
+    },
+    {
+      "id": "services",
+      "label": "Services of interest",
+      "prompt": "Which services are you interested in? (A short phrase is fine—for example: 'website redesign', 'cloud migration', 'IT support', or 'other'.)",
+      "type": "text",
+      "minLength": 3,
+      "error": "Tell me briefly what you need—just a few words is fine."
+    },
+    {
+      "id": "appointmentDay",
+      "label": "Preferred day of week",
+      "prompt": "Do you have a preferred day of the week for your appointment?",
+      "type": "select",
+      "options": ["No preference", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "error": "Please choose one of the options: Monday–Friday or 'No preference'."
+    },
+    {
+      "id": "appointmentDate",
+      "label": "Preferred date(s)",
+      "prompt": "What date or dates work for you? You can say something like 'Sept 22 or 23' or 'anytime next Tuesday'.",
+      "type": "text",
+      "minLength": 3,
+      "error": "Please share at least one date—e.g., 'Sept 22' or 'next Tuesday'."
+    },
+    {
+      "id": "appointmentTimeWindow",
+      "label": "Available hours",
+      "prompt": "What hours are you available on those days? For example: '9am–12pm', 'after 3:30pm', or 'anytime after 10am'.",
+      "type": "text",
+      "minLength": 3,
+      "error": "Please share a time window—e.g., '9am–12pm' or 'after 3:30pm'."
+    },
+    {
+      "id": "timezone",
+      "label": "Time zone",
+      "prompt": "What time zone are you in? (If unsure, you can say your city.)",
+      "type": "select",
+      "options": ["US/Eastern", "US/Central", "US/Mountain", "US/Pacific", "Other"],
+      "error": "Please choose a time zone or 'Other'."
+    },
+    {
+      "id": "contactPreference",
+      "label": "Contact preference",
+      "prompt": "How would you prefer we contact you?",
+      "type": "select",
+      "options": ["Email", "Phone", "Either is fine"],
+      "error": "Please choose 'Email', 'Phone', or 'Either is fine'."
+    },
+    {
+      "id": "phone",
+      "label": "Phone number (optional)",
+      "prompt": "If phone is okay, what’s the best number to reach you? You can skip this if you prefer email only.",
+      "type": "text",
+      "optional": true
+    },
+    {
+      "id": "notes",
+      "label": "Additional notes (optional)",
+      "prompt": "Is there anything else you’d like us to know—specific goals, deadlines, or context?",
+      "type": "text",
+      "optional": true
+    }
+  ],
+  "closing": "Perfect—thank you! I’ve captured your details and we’ll follow up to confirm an appointment that fits your availability. Have a nice day!"
+}

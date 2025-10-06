@@ -1,0 +1,65 @@
+[
+  {
+    "name": "John Smith",
+    "email": "JohnSmith@gmail.com",
+    "services": "I disappoint",
+    "appointmentDay": "Friday at 2:00 p.m.",
+    "appointmentDate": "anytime next Tuesday",
+    "appointmentTimeWindow": "at 2:00 p.m.",
+    "timezone": "I'm in Baltimore",
+    "contactPreference": "via email",
+    "phone": "skip",
+    "notes": "nope nope nope",
+    "createdAt": "2025-09-18T19:04:27.029Z"
+  },
+  {
+    "name": "John Smith",
+    "email": "JohnSmith@gmail.com",
+    "services": "website design",
+    "appointmentDay": "no",
+    "appointmentDate": "anytime next Monday",
+    "appointmentTimeWindow": "anytime after 11:00",
+    "timezone": "San Jose",
+    "contactPreference": "email",
+    "phone": "667-802-9890",
+    "notes": "nope",
+    "createdAt": "2025-09-18T19:06:15.609Z"
+  },
+  {
+    "name": "Olivia pepper",
+    "email": "Oliviapepper@gmail.com",
+    "services": "Cloud migration",
+    "appointmentDay": "no no",
+    "appointmentDate": "September 25th",
+    "appointmentTimeWindow": "9 to 10:00 a.m.",
+    "timezone": "London",
+    "contactPreference": "phone",
+    "phone": "667 802 9890",
+    "notes": "when you call just",
+    "createdAt": "2025-09-18T19:11:40.723Z"
+  },
+  {
+    "name": "Tom Cruise",
+    "email": "TomCruise@gmail.com",
+    "services": "website design",
+    "appointmentDay": "no no",
+    "appointmentDate": "September 24th",
+    "appointmentTimeWindow": "after 12:00 p.m.",
+    "timezone": "Baltimore",
+    "contactPreference": "phone",
+    "phone": "667-802-9890",
+    "notes": "no I don't",
+    "createdAt": "2025-09-19T18:27:43.833Z"
+  },
+  {
+    "source": "twilio",
+    "callSid": "CA7c123b94f26d85ea511f5d991e2d1976",
+    "name": "My name is John Smith.",
+    "email": "John@gmail.com.",
+    "services": "Out integration.",
+    "appointmentDay": "1st October.",
+    "appointmentDate": "Wednesday, 1st October.",
+    "appointmentTimeWindow": "I am available 10 to 12.",
+    "createdAt": "2025-09-30T19:26:28.215Z"
+  }
+]
